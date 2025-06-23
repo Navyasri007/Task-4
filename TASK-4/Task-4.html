@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Multi-Project App</title>
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', sans-serif;
+      background: #f0f0f5;
+    }
+    header {
+      background-color: #4a90e2;
+      padding: 20px;
+      text-align: center;
+      color: white;
+      font-size: 2rem;
+      animation: fadeInDown 1s ease-in-out;
+    }
+    nav {
+      display: flex;
+      justify-content: center;
+      gap: 20px;
+      background: #333;
+      padding: 10px 0;
+    }
+    nav a {
+      color: white;
+      text-decoration: none;
+      padding: 10px 20px;
+      border-radius: 5px;
+      transition: background 0.3s;
+    }
+    nav a:hover {
+      background-color: #4a90e2;
+    }
+    section {
+      display: none;
+      padding: 20px;
+      animation: fadeIn 0.8s ease-in-out;
+    }
+    section.active {
+      display: block;
+    }
+    @keyframes fadeIn {
+      from {opacity: 0; transform: translateY(20px);}
+      to {opacity: 1; transform: translateY(0);}
+    }
+    @keyframes fadeInDown {
+      from {opacity: 0; transform: translateY(-20px);}
+      to {opacity: 1; transform: translateY(0);}
+    }
+    /* Portfolio */
+    .project {
+      background: white;
+      padding: 15px;
+      margin-bottom: 15px;
+      border-radius: 10px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    }
+    /* To-Do App */
+    #todo-input {
+      padding: 10px;
+      width: 70%;
+    }
+    #add-btn {
+      padding: 10px;
+      background: #4caf50;
+      color: white;
+      border: none;
+    }
+    .task {
+      background: #fff;
+      padding: 10px;
+      margin-top: 10px;
+    }
+    /* Product Listing */
+    .filters {
+      margin-bottom: 10px;
+    }
+    .product {
+      background: white;
+      padding: 15px;
+      margin: 10px 0;
+      border: 1px solid #ddd;
+    }
+  </style>
+</head>
+<body>
+  <header>Multi-Project Web App</header>
+  <nav>
+    <a href="#" onclick="showSection('portfolio')">Portfolio</a>
+    <a href="#" onclick="showSection('todo')">To-Do App</a>
+    <a href="#" onclick="showSection('products')">Product Listing</a>
+  </nav>
+
+  <section id="portfolio" class="active">
+    <h2>About Me</h2>
+    <p>I'm a passionate developer...</p>
+    <h2>Projects</h2>
+    <div class="project">Portfolio Website</div>
+    <div class="project">To-Do List App</div>
+    <h2>Contact</h2>
+    <p>Email: example@example.com</p>
+  </section>
+
+  <section id="todo">
+    <h2>To-Do List</h2>
+    <input id="todo-input" placeholder="Enter task" />
+    <button id="add-btn">Add</button>
+    <div id="task-list"></div>
+  </section>
+
+  <section id="products">
+    <h2>Product Listing</h2>
+    <div class="filters">
+      <label>Filter by Category:
+        <select id="category-filter">
+          <option value="all">All</option>
+          <option value="tech">Tech</option>
+          <option value="fashion">Fashion</option>
+        </select>
+      </label>
+      <label>Sort by Price:
+        <select id="sort-price">
+          <option value="asc">Low to High</option>
+          <option value="desc">High to Low</option>
+        </select>
+      </label>
+    </div>
+    <div id="product-list"></div>
+  </section>
+
+  <script>
+    // Navigation
+    function showSection(id) {
+      document.querySelectorAll('section').forEach(s => s.classList.remove('active'));
+      document.getElementById(id).classList.add('active');
+    }
+
+    // To-Do App Logic
+    const taskInput = document.getElementById('todo-input');
+    const taskList = document.getElementById('task-list');
+    const addBtn = document.getElementById('add-btn');
+
+    function loadTasks() {
+      taskList.innerHTML = '';
+      const tasks = JSON.parse(localStorage.getItem('tasks') || '[]');
+      tasks.forEach((task, i) => {
+        const div = document.createElement('div');
+        div.className = 'task';
+        div.textContent = task;
+        div.onclick = () => deleteTask(i);
+        taskList.appendChild(div);
+      });
+    }
+
+    function addTask() {
+      const task = taskInput.value.trim();
+      if (task === '') return;
+      const tasks = JSON.parse(localStorage.getItem('tasks') || '[]');
+      tasks.push(task);
+      localStorage.setItem('tasks', JSON.stringify(tasks));
+      taskInput.value = '';
+      loadTasks();
+    }
+
+    function deleteTask(index) {
+      const tasks = JSON.parse(localStorage.getItem('tasks') || '[]');
+      tasks.splice(index, 1);
+      localStorage.setItem('tasks', JSON.stringify(tasks));
+      loadTasks();
+    }
+
+    addBtn.onclick = addTask;
+    loadTasks();
+
+    // Product Listing Logic
+    const products = [
+      { name: "Laptop", category: "tech", price: 1000 },
+      { name: "T-Shirt", category: "fashion", price: 20 },
+      { name: "Smartphone", category: "tech", price: 500 },
+      { name: "Jeans", category: "fashion", price: 40 },
+    ];
+
+    const productList = document.getElementById('product-list');
+    const categoryFilter = document.getElementById('category-filter');
+    const sortPrice = document.getElementById('sort-price');
+
+    function renderProducts() {
+      const category = categoryFilter.value;
+      const sort = sortPrice.value;
+
+      let filtered = [...products];
+      if (category !== 'all') {
+        filtered = filtered.filter(p => p.category === category);
+      }
+
+      if (sort === 'asc') {
+        filtered.sort((a, b) => a.price - b.price);
+      } else {
+        filtered.sort((a, b) => b.price - a.price);
+      }
+
+      productList.innerHTML = '';
+      filtered.forEach(p => {
+        const div = document.createElement('div');
+        div.className = 'product';
+        div.textContent = `${p.name} - $${p.price}`;
+        productList.appendChild(div);
+      });
+    }
+
+    categoryFilter.onchange = renderProducts;
+    sortPrice.onchange = renderProducts;
+    renderProducts();
+  </script>
+</body>
+</html>
